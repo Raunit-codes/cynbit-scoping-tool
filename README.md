@@ -4,9 +4,6 @@ A full-stack prototype that replaces a generic "name, email, message" contact
 form with a **Project Scoping & Instant Estimate wizard** — built as a
 proposed improvement to [cynbit.in](https://www.cynbit.in/).
 
-See [`REPORT.md`](./REPORT.md) for the problem statement, design rationale,
-and results. This file covers setup only.
-
 ## What it does
 
 A visitor picks the service they want (mirroring Cynbit's real four service
