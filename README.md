@@ -4,7 +4,6 @@ A full-stack prototype that replaces a generic "name, email, message" contact
 form with a **Project Scoping & Instant Estimate wizard** — built as a
 proposed improvement to [cynbit.in](https://www.cynbit.in/).
 
-
 ## What it does
 
 A visitor picks the service they want (mirroring Cynbit's real four service
@@ -51,6 +50,10 @@ Then open <http://localhost:3000>.
 ## Deploying
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1a3fdcc2cbf858d925f58b64fae3b44f604609f8
 ## Known limitations (by design, for a prototype)
 
 - **Leads are stored in memory** (`lib/store.ts`), so they reset on every
