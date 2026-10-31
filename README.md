@@ -48,12 +48,7 @@ npm run dev
 Then open <http://localhost:3000>.
 
 ## Deploying
-
-
-<<<<<<< HEAD
-=======
-
->>>>>>> 1a3fdcc2cbf858d925f58b64fae3b44f604609f8
+on vercel https://cynbit-scoping-tool.vercel.app
 ## Known limitations (by design, for a prototype)
 
 - **Leads are stored in memory** (`lib/store.ts`), so they reset on every
