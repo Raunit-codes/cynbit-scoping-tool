@@ -13,6 +13,7 @@
   --accent-2: #1e8f6b;
   --danger: #b4452f;
   color-scheme: light;
+  --font-body: Arial, Helvetica, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

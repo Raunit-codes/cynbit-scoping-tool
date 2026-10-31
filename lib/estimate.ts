@@ -30,7 +30,9 @@ export function computeEstimate(
   // prevents a crafted request from padding the item count with IDs
   // borrowed from a different pillar.
   const validScopeIds = new Set(pillar.scope.map((s) => s.id));
-  const validCount = scopeIds.filter((id) => validScopeIds.has(id)).length;
+  const validCount = new Set(
+  scopeIds.filter((id) => validScopeIds.has(id))
+).size;
 
   const raw = (pillar.base + validCount * PER_SCOPE_ITEM_THOUSANDS) * stage.multiplier * timeline.multiplier;
 
