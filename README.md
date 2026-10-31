@@ -52,10 +52,7 @@ Then open <http://localhost:3000>.
 
 ## Deploying
 
-This is a standard Next.js app, so it deploys to
-[Vercel](https://vercel.com) with no extra configuration: push this repo to
-GitHub, import it in Vercel, and it builds automatically. No environment
-variables are required to run the prototype as-is.
+
 
 ## Known limitations (by design, for a prototype)
 
