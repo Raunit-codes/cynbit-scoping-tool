@@ -1,64 +1,80 @@
 # Cynbit Scoping Tool
 
-A full-stack prototype that replaces a generic "name, email, message" contact
-form with a **Project Scoping & Instant Estimate wizard** — built as a
-proposed improvement to [cynbit.in](https://www.cynbit.in/).
+A full-stack prototype that replaces a generic "name, email, message" contact form with a **Project Scoping & Instant Estimate wizard** — built as a proposed improvement to [cynbit.in](https://www.cynbit.in/).
 
 ## What it does
 
-A visitor selects the service they need (mirroring Cynbit's real four service
-pillars: AI automation, software development, cloud infrastructure, SEO &
-marketing), the specific scope items within it, their company stage, and
-timeline. They see an **illustrative estimate range update live** as they
-go, then submit their contact details. The submission is validated and the
-estimate is **recomputed server-side** (the client's number is never
-trusted) before being stored as a structured, pre-qualified lead.
+A visitor selects the service they need (Cynbit's four service pillars: AI automation, software development, cloud infrastructure, and SEO/marketing), the scope items, company stage, and timeline. They see an **illustrative estimate range update live**, then submit contact details. The API validates the input and recomputes the estimate server-side rather than trusting a client-provided amount. The structured lead is persisted in PostgreSQL through Supabase and Prisma.
 
 ## Stack
 
-- **Next.js 15** (App Router, TypeScript) — one codebase, frontend + API
-- **Tailwind CSS** — styling, using Cynbit's own stated tech stack
-- Zero external services — the estimate logic and lead store are plain
-  TypeScript, so there's nothing extra to configure to run this locally
+- **Next.js 15** (App Router, TypeScript) — frontend and API
+- **Tailwind CSS** — styling
+- **PostgreSQL (Supabase)** — persistent lead storage
+- **Prisma ORM 6** — database access and migrations
 
 ## Project layout
 
 ```
 app/
-  page.tsx            Home page — renders the wizard
-  layout.tsx           Root layout, font loading
-  globals.css           Design tokens (light/dark) + Tailwind
-  api/leads/route.ts     POST (submit + validate + persist)
+  page.tsx
+  layout.tsx
+  globals.css
+  api/leads/route.ts
 components/
-  ScopingWizard.tsx      The wizard UI (client component)
+  ScopingWizard.tsx
 lib/
-  domain.ts            Cynbit's four service pillars + their scope items
-  estimate.ts          Pure estimate calculation (shared client + server)
-  store.ts             Server-side validation + in-memory lead storage
-  types.ts             Shared TypeScript types
+  domain.ts             Service pillars and scope items
+  estimate.ts           Shared estimate calculation
+  store.ts              Server validation and database persistence
+  prisma.ts             Prisma Client singleton
+  types.ts              Shared TypeScript types
+prisma/
+  schema.prisma         Lead database model
+  migrations/           Database migration history
+prisma.config.ts        Prisma CLI configuration
 ```
 
-## Running locally
+## Run locally
 
-```bash
-npm install
-npm run dev
-```
+1. Install dependencies:
 
-Then open <http://localhost:3000>.
+   ```bash
+   npm install
+   ```
 
-## Deploying
-on vercel https://cynbit-scoping-tool.vercel.app
-## Known limitations (by design, for a prototype)
+2. Create a `.env` file in the project root and configure the Supabase PostgreSQL connection strings:
 
-- **Leads are stored in memory** (`lib/store.ts`), so they reset on every
-  server restart / serverless cold start. Swap `saveLead` for
-  a real table — Cynbit's own services page already lists Postgres,
-  Prisma, and Supabase, any of which would drop in behind the same two
-  functions.
-- **No email/Slack notification is wired up** — the API route has a
-  comment marking exactly where to add one once real credentials exist.
-- **Estimate figures are illustrative placeholders.** The base costs and
-  multipliers in `lib/estimate.ts` are structured to be easy to tune, but
-  the actual numbers need to come from Cynbit's real rate card before this
-  ships to real visitors.
+   ```env
+   DATABASE_URL="your-supabase-transaction-pooler-url"
+   DIRECT_URL="your-supabase-session-pooler-url"
+   ```
+
+   Use your own Supabase credentials. **Do not commit the `.env` file or expose database URLs.**
+
+3. Generate Prisma Client and apply migrations:
+
+   ```bash
+   npx prisma generate
+   npx prisma migrate dev
+   ```
+
+4. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Open <http://localhost:3000>.
+
+## Deployment
+
+The prototype is deployed on Vercel: <https://cynbit-scoping-tool.vercel.app>
+
+Configure `DATABASE_URL` and `DIRECT_URL` as environment variables in the Vercel project before deploying database-backed functionality. Never use local `.env` credentials in source control.
+
+## Known limitations
+
+- **Estimate figures are illustrative placeholders.** The base costs and multipliers need to be calibrated against Cynbit's actual rate card before production use.
+- **No email/Slack notification is wired up.** Notifications can be added after successful lead persistence.
+- **No authenticated lead-management dashboard exists yet.** Lead retrieval should only be added behind appropriate authentication and authorization.
