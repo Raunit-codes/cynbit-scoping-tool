@@ -27,8 +27,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const lead = saveLead(result.data);
-
+    const lead = await saveLead(result.data);
     return NextResponse.json(
       { ok: true, lead },
       { status: 201 }

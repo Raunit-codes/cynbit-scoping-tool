@@ -8,9 +8,28 @@ generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
 }
-
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+model Lead {
+  id                    String   @id @default(cuid())
+  name                  String
+  email                 String
+  company               String?
+  industry              String?
+
+  pillar                String
+  scope                 String[]
+  stage                 String
+  timeline              String
+
+  estimateLowThousandsINR  Int
+  estimateHighThousandsINR Int
+
+  submittedAt           DateTime @default(now())
+
+  @@map("leads")
 }

@@ -1,7 +1,6 @@
-
-import { randomUUID } from "crypto";
 import { findPillar, findStage, findTimeline } from "./domain";
 import { computeEstimate } from "./estimate";
+import { prisma } from "./prisma";
 import { LeadInput, StoredLead } from "./types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -102,11 +101,8 @@ export function validateLeadInput(
   };
 }
 
-// In-memory prototype store.
-// Replace with persistent database storage before production.
-const leads: StoredLead[] = [];
-
-export function saveLead(input: LeadInput): StoredLead {
+// Persist leads in Supabase PostgreSQL using Prisma.
+export async function saveLead(input: LeadInput): Promise<StoredLead> {
   const estimate = computeEstimate(
     input.pillar,
     input.scope,
@@ -118,14 +114,25 @@ export function saveLead(input: LeadInput): StoredLead {
     throw new Error("Could not compute estimate for the given input.");
   }
 
-  const lead: StoredLead = {
+  const savedLead = await prisma.lead.create({
+    data: {
+      name: input.name,
+      email: input.email,
+      company: input.company ?? null,
+      industry: input.industry ?? null,
+      pillar: input.pillar,
+      scope: input.scope,
+      stage: input.stage,
+      timeline: input.timeline,
+      estimateLowThousandsINR: estimate.lowThousandsINR,
+      estimateHighThousandsINR: estimate.highThousandsINR,
+    },
+  });
+
+  return {
     ...input,
-    id: randomUUID(),
+    id: savedLead.id,
     estimate,
-    submittedAt: new Date().toISOString(),
+    submittedAt: savedLead.submittedAt.toISOString(),
   };
-
-  leads.push(lead);
-
-  return lead;
 }
