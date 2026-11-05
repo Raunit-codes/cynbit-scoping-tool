@@ -70,7 +70,7 @@ the highest-leverage single change to prototype.
 | State | **React `useState`** (no external state library) | The form has four steps and a flat shape — a reducer/store library would be overhead for this scope. |
 | Validation | Server-side validation with field-specific API errors | The API validates submitted values independently of the browser. The current UI provides basic step-selection constraints, while authoritative validation happens on submission. |
 | Estimate logic | **A single pure function (`lib/estimate.ts`), imported by both the client and the API route** | This is the one piece of business logic in the app, and it must not live in two places that can drift — see §3.2. |
-| Persistence | **In-memory array (`lib/store.ts`)** | Deliberately the simplest possible thing that demonstrates the real interface (`saveLead`) without requiring a provisioned database for a take-home prototype. Documented as the first thing to swap before production (§4). |
+| Persistence | **PostgreSQL (Supabase) with Prisma ORM 6** | Leads are persisted in a relational database rather than an in-memory array, so records survive server restarts and serverless instance lifecycles. Prisma provides the schema, client, and migration workflow. |
 | Deployment target | **Vercel** | Zero-config for a Next.js app; matches how a company this size would actually ship it. |
 
 ---
@@ -92,7 +92,7 @@ Step 2: Scope         (multi-select, pillar-specific items)
 Step 3: Stage + timeline
   │
   ▼
-Step 4: Contact details  ──POST /api/leads──▶  validate → recompute estimate → persist
+Step 4: Contact details  ──POST /api/leads──▶  validate → recompute estimate → persist in PostgreSQL
   │                                                              │
   ◀──────────────── confirmation (server-computed estimate) ────┘
 ```
@@ -127,7 +127,7 @@ Base costs and multipliers live in `lib/domain.ts` as plain data, while the calc
 
 The figures shipped in this prototype are illustrative placeholders. The UI explicitly communicates that the estimate must be calibrated against Cynbit's real rate card before production use.
 
-### 3.4 Validation
+### 3.4 Validation and persistence
 
 `lib/store.ts` contains the authoritative server-side validation logic. The API route returns structured validation errors with a `422` status when submitted data is invalid.
 
@@ -144,7 +144,7 @@ The API returns field-specific validation errors, although the current UI displa
 
 One deliberate removal: an earlier version exposed an unauthenticated `GET /api/leads` endpoint that returned submitted lead information. This endpoint has been removed. The current API only exposes `POST /api/leads`; an authenticated internal lead-management interface remains future work.
 
-The current persistence layer is an in-memory array, so submissions are not guaranteed to survive serverless instance lifecycles or application restarts.
+Validated lead records are now persisted in PostgreSQL hosted by Supabase using Prisma. The Prisma schema defines the lead data model, and the migration history records the database schema changes. The database connection is configured through `DATABASE_URL` and `DIRECT_URL` environment variables; these credentials must not be committed to source control.
 
 ---
 
@@ -163,6 +163,8 @@ should be measured once it's live — rather than invented analytics.
   server, and the server never trusts a client-submitted number.
 - The flow degrades gracefully: invalid submissions return field-specific
   errors instead of a generic failure.
+- Supabase/PostgreSQL persistence was tested end-to-end: a lead was submitted
+  through the wizard and successfully appeared in the Supabase `leads` table.
 
 **What should be measured once deployed**, to turn this from "plausibly
 better" into "measurably better":
@@ -195,11 +197,17 @@ in-memory store, this report.
   de-dupes independently as a second layer.
 - Added length limits on name, email, company, and industry.
 
+**Round 3 (database integration) — done:**
+- Replaced in-memory lead storage with PostgreSQL persistence using Supabase and Prisma.
+- Added the Prisma lead model and migration.
+- Added Prisma Client initialization and connected it to the lead-saving function.
+- Updated the API route to await database persistence.
+- Verified a submitted wizard lead appears in Supabase's `leads` table.
+
 ## 6. What I'd do next
 
-1. **Persistent storage.** Replace `lib/store.ts`'s in-memory array with PostgreSQL, using Prisma or Supabase, so lead records survive deployments and serverless instance lifecycles. This is the next piece of work, not yet implemented.
-2. **Email or Slack notifications.** Add a notification integration after successful lead persistence, using securely configured credentials and environment variables.
-3. Replace the hand-written validation with Zod, using a shared schema for client-side and server-side validation as the form grows.
-4. Calibrate `lib/domain.ts`'s base costs and multipliers against Cynbit's real rate card before production use.
-5. Pre-select the pillar from the Services page's inquiry links (e.g. `/estimate?pillar=ai`) so visitors do not have to select a service they have already expressed interest in.
-6. Build an authenticated internal dashboard for reviewing submitted leads. Lead retrieval should only be exposed through appropriately authenticated and authorized functionality.
+1. **Email or Slack notifications.** Add a notification integration after successful lead persistence, using securely configured credentials and environment variables.
+2. Replace the hand-written validation with Zod, using a shared schema for client-side and server-side validation as the form grows.
+3. Calibrate `lib/domain.ts`'s base costs and multipliers against Cynbit's real rate card before production use.
+4. Pre-select the pillar from the Services page's inquiry links (e.g. `/estimate?pillar=ai`) so visitors do not have to select a service they have already expressed interest in.
+5. Build an authenticated internal dashboard for reviewing submitted leads. Lead retrieval should only be exposed through appropriately authenticated and authorized functionality.
