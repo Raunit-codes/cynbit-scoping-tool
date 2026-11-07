@@ -9,6 +9,11 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "allowScripts": {
+    "@prisma/client": true,
+    "@prisma/engines": true,
+    "prisma": true
+  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "next": "15.5.28",
