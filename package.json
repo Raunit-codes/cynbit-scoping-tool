@@ -5,7 +5,7 @@
   "description": "Project Scoping & Instant Estimate tool — a full-stack prototype improvement for cynbit.in",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && node -e \"const fs=require('fs'); const p='lib/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node'; if (!fs.existsSync(p)) { console.error('MISSING LINUX PRISMA ENGINE:', p); process.exit(1); } console.log('LINUX PRISMA ENGINE EXISTS:', p);\" && next build",
     "start": "next start",
     "lint": "next lint"
   },
