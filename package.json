@@ -4,19 +4,20 @@
   "private": true,
   "description": "Project Scoping & Instant Estimate tool — a full-stack prototype improvement for cynbit.in",
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && node -e \"const fs=require('fs'); const p='lib/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node'; if (!fs.existsSync(p)) { console.error('MISSING LINUX PRISMA ENGINE:', p); process.exit(1); } console.log('LINUX PRISMA ENGINE EXISTS:', p);\" && next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+  "dev": "next dev",
+  "build": "prisma generate && next build",
+  "start": "next start",
+  "lint": "next lint"},
   "allowScripts": {
     "@prisma/client": true,
     "@prisma/engines": true,
     "prisma": true
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.19.3",
     "next": "15.5.28",
+    "pg": "^8.23.1",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
